@@ -156,16 +156,13 @@ namespace Vendr.PaymentProviders.Bambora
                         var transactionResp = client.GetTransaction(txnId);
                         if (transactionResp.Meta.Result)
                         {
-                            return new CallbackResponse
+                            return CallbackResponse.Ok(new TransactionInfo
                             {
-                                TransactionInfo = new TransactionInfo
-                                {
-                                    TransactionId = transactionResp.Transaction.Id,
-                                    AmountAuthorized = AmountFromMinorUnits(amount + txnFee),
-                                    TransactionFee = AmountFromMinorUnits(txnFee),
-                                    PaymentStatus = GetPaymentStatus(transactionResp.Transaction)
-                                }
-                            };
+                                TransactionId = transactionResp.Transaction.Id,
+                                AmountAuthorized = AmountFromMinorUnits(amount + txnFee),
+                                TransactionFee = AmountFromMinorUnits(txnFee),
+                                PaymentStatus = GetPaymentStatus(transactionResp.Transaction)
+                            });
                         }
                     }
                 }
@@ -175,10 +172,7 @@ namespace Vendr.PaymentProviders.Bambora
                 Vendr.Log.Error<BamboraPaymentProvider>(ex, "Bambora - ProcessCallback");
             }
 
-            return new CallbackResponse
-            {
-                HttpResponse = new HttpResponseMessage(HttpStatusCode.BadRequest)
-            };
+            return CallbackResponse.BadRequest();
         }
 
         public override ApiResponse FetchPaymentStatus(OrderReadOnly order, BamboraSettings settings)
