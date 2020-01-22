@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
@@ -31,11 +31,17 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Flurl, Version=2.8.2.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\Flurl.2.8.2\lib\net40\Flurl.dll</HintPath>
+    </Reference>
+    <Reference Include="Flurl.Http, Version=2.4.2.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\Flurl.Http.2.4.2\lib\net46\Flurl.Http.dll</HintPath>
+    </Reference>
     <Reference Include="Microsoft.Web.Infrastructure, Version=1.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\..\packages\Microsoft.Web.Infrastructure.1.0.0.0\lib\net40\Microsoft.Web.Infrastructure.dll</HintPath>
     </Reference>
-    <Reference Include="Newtonsoft.Json, Version=9.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\Newtonsoft.Json.9.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
+    <Reference Include="Newtonsoft.Json, Version=12.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\Newtonsoft.Json.12.0.2\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Configuration" />
@@ -75,6 +81,21 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Api\BamboraClient.cs" />
+    <Compile Include="Api\Models\BamboraClientConfig.cs" />
+    <Compile Include="Api\Models\BamboraCreateCheckoutSessionRequest.cs" />
+    <Compile Include="Api\Models\BamboraCustomer.cs" />
+    <Compile Include="Api\Models\BamboraOrder.cs" />
+    <Compile Include="Api\Models\BamboraCheckoutSession.cs" />
+    <Compile Include="Api\Models\BamboraPaymentFilter.cs" />
+    <Compile Include="Api\Models\BamboraPaymentWindow.cs" />
+    <Compile Include="Api\Models\BamboraUrl.cs" />
+    <Compile Include="Api\Models\BamboraUrls.cs" />
+    <Compile Include="Api\Models\BomboraResponse.cs" />
+    <Compile Include="Api\Models\BomboraResponseMetaData.cs" />
+    <Compile Include="Api\Models\BomboraTransaction.cs" />
+    <Compile Include="Api\Models\BomboraTransactionResponse.cs" />
+    <Compile Include="BamboraMode.cs" />
     <Compile Include="BamboraPaymentProvider.cs" />
     <Compile Include="BamboraSettings.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
