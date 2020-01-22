@@ -5,7 +5,6 @@ using System.Web;
 using Vendr.PaymentProviders.Bambora.Api.Models;
 using System;
 using System.Security.Cryptography;
-using Newtonsoft.Json;
 
 namespace Vendr.PaymentProviders.Bambora.Api
 {
@@ -18,32 +17,68 @@ namespace Vendr.PaymentProviders.Bambora.Api
             _config = config;
         }
 
-        public BamboraCheckoutSession CreateCheckoutSession(BamboraCreateCheckoutSessionRequest request)
+        public BamboraCheckoutSessionResponse CreateCheckoutSession(BamboraCreateCheckoutSessionRequest request)
         {
-            var apiKey = GenerateApiKey(_config);
-
-            return new FlurlRequest("https://api.v1.checkout.bambora.com/sessions")
-                .WithHeader("Content-Type", "application/json")
-                .WithHeader("Accept", "application/json")
-                .WithHeader("Authorization", "Basic " + apiKey)
+            var result = new FlurlRequest("https://api.v1.checkout.bambora.com/sessions")
+                .AllowAnyHttpStatus()
+                .WithHeader("Authorization", "Basic " + GenerateApiKey(_config))
                 .PostJsonAsync(request)
-                .ReceiveJson<BamboraCheckoutSession>()
+                .ReceiveJson<BamboraCheckoutSessionResponse>()
                 .Result;
+
+            return result;
         }
 
-        public BomboraTransaction GetTransaction(string txnId)
+        public BamboraTransactionResponse GetTransaction(string txnId)
         {
             var result = new FlurlRequest($"https://merchant-v1.api-eu.bambora.com/transactions/{txnId}")
+                .WithHeader("Accept", "application/json")
                 .WithHeader("Authorization", "Basic " + GenerateApiKey(_config))
+                .AllowAnyHttpStatus()
                 .GetAsync()
-                .ReceiveJson<BomboraTransactionResponse>()
+                .ReceiveJson<BamboraTransactionResponse>()
                 .Result;
 
-            // TODO: Log unsuccessful request
+            return result;
+        }
 
-            return result.Meta.Result
-                ? result.Transaction
-                : null;
+        public BamboraResponse CaptureTransaction(string txnId, BamboraAmountRequest req = null)
+        {
+            var result = new FlurlRequest($"https://transaction-v1.api-eu.bambora.com/transactions/{txnId}/capture")
+                .WithHeader("Accept", "application/json")
+                .WithHeader("Authorization", "Basic " + GenerateApiKey(_config))
+                .AllowAnyHttpStatus()
+                .PostJsonAsync(req)
+                .ReceiveJson<BamboraResponse>()
+                .Result;
+
+            return result;
+        }
+
+        public BamboraResponse CreditTransaction(string txnId, BamboraAmountRequest req)
+        {
+            var result = new FlurlRequest($"https://transaction-v1.api-eu.bambora.com/transactions/{txnId}/credit")
+                .WithHeader("Accept", "application/json")
+                .WithHeader("Authorization", "Basic " + GenerateApiKey(_config))
+                .AllowAnyHttpStatus()
+                .PostJsonAsync(req)
+                .ReceiveJson<BamboraResponse>()
+                .Result;
+
+            return result;
+        }
+
+        public BamboraResponse DeleteTransaction(string txnId)
+        {
+            var result = new FlurlRequest($"https://transaction-v1.api-eu.bambora.com/transactions/{txnId}/delete")
+                .WithHeader("Accept", "application/json")
+                .WithHeader("Authorization", "Basic " + GenerateApiKey(_config))
+                .AllowAnyHttpStatus()
+                .PostJsonAsync(null)
+                .ReceiveJson<BamboraResponse>()
+                .Result;
+
+            return result;
         }
 
         public bool ValidateRequest(HttpRequestBase request)

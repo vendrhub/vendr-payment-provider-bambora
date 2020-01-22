@@ -91,19 +91,23 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Api\BamboraClient.cs" />
+    <Compile Include="Api\Models\BamboraAmountRequest.cs" />
+    <Compile Include="Api\Models\BamboraAvailableAmounts.cs" />
     <Compile Include="Api\Models\BamboraClientConfig.cs" />
     <Compile Include="Api\Models\BamboraCreateCheckoutSessionRequest.cs" />
     <Compile Include="Api\Models\BamboraCustomer.cs" />
     <Compile Include="Api\Models\BamboraOrder.cs" />
-    <Compile Include="Api\Models\BamboraCheckoutSession.cs" />
+    <Compile Include="Api\Models\BamboraCheckoutSessionResponse.cs" />
     <Compile Include="Api\Models\BamboraPaymentFilter.cs" />
     <Compile Include="Api\Models\BamboraPaymentWindow.cs" />
+    <Compile Include="Api\Models\BamboraTotals.cs" />
     <Compile Include="Api\Models\BamboraUrl.cs" />
     <Compile Include="Api\Models\BamboraUrls.cs" />
-    <Compile Include="Api\Models\BomboraResponse.cs" />
-    <Compile Include="Api\Models\BomboraResponseMetaData.cs" />
-    <Compile Include="Api\Models\BomboraTransaction.cs" />
-    <Compile Include="Api\Models\BomboraTransactionResponse.cs" />
+    <Compile Include="Api\Models\BamboraMessage.cs" />
+    <Compile Include="Api\Models\BamboraResponse.cs" />
+    <Compile Include="Api\Models\BamboraResponseMetaData.cs" />
+    <Compile Include="Api\Models\BamboraTransaction.cs" />
+    <Compile Include="Api\Models\BamboraTransactionResponse.cs" />
     <Compile Include="BamboraMode.cs" />
     <Compile Include="BamboraPaymentProvider.cs" />
     <Compile Include="BamboraSettings.cs" />

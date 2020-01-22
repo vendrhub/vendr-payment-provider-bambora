@@ -2,9 +2,9 @@
 
 namespace Vendr.PaymentProviders.Bambora.Api.Models
 {
-    public class BomboraTransactionResponse : BomboraResponse
+    public class BamboraTransactionResponse : BamboraResponse
     {
         [JsonProperty("transaction")]
-        public BomboraTransaction Transaction { get; set; }
+        public BamboraTransaction Transaction { get; set; }
     }
 }

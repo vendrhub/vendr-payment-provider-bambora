@@ -1,10 +1,7 @@
 using System;
-using System.Globalization;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
-using System.Security.Cryptography;
-using System.Text;
 using System.Text.RegularExpressions;
 using System.Web;
 using System.Web.Mvc;
@@ -31,6 +28,7 @@ namespace Vendr.PaymentProviders.Bambora
         public override bool CanRefundPayments => true;
         public override bool CanFetchPaymentStatus => true;
 
+        // We'll finalize via webhook callback
         public override bool FinalizeAtContinueUrl => false;
 
         public override string GetCancelUrl(OrderReadOnly order, BamboraSettings settings)
@@ -126,7 +124,10 @@ namespace Vendr.PaymentProviders.Bambora
 
             var checkoutSession = client.CreateCheckoutSession(checkoutSessionRequest);
 
-            return new PaymentForm(checkoutSession.Url, FormMethod.Get);
+            if (checkoutSession.Meta.Result) 
+                return new PaymentForm(checkoutSession.Url, FormMethod.Get);
+
+            throw new ApplicationException(checkoutSession.Meta.Message.EndUser);
         }
 
         public override CallbackResponse ProcessCallback(OrderReadOnly order, HttpRequestBase request, BamboraSettings settings)
@@ -149,25 +150,29 @@ namespace Vendr.PaymentProviders.Bambora
                         && orderId == BamboraSafeOrderId(order.OrderNumber)
                         && amount > 0)
                     {
-                        // TODO: Could do with knowing a better way if the payment is captured
-                        // as it's possible a provider could be updated after transaction is
-                        // triggered but before callback is received
-                        return new CallbackResponse
+                        // Fetch the transaction details so that we can work out
+                        // the status of the transaction as the querystring params
+                        // are not enough on their own
+                        var transactionResp = client.GetTransaction(txnId);
+                        if (transactionResp.Meta.Result)
                         {
-                            TransactionInfo = new TransactionInfo
+                            return new CallbackResponse
                             {
-                                TransactionId = txnId,
-                                AmountAuthorized = AmountFromMinorUnits(amount + txnFee),
-                                TransactionFee = AmountFromMinorUnits(txnFee),
-                                PaymentStatus = settings.Capture ? PaymentStatus.Captured : PaymentStatus.Authorized
-                            }
-                        };
+                                TransactionInfo = new TransactionInfo
+                                {
+                                    TransactionId = transactionResp.Transaction.Id,
+                                    AmountAuthorized = AmountFromMinorUnits(amount + txnFee),
+                                    TransactionFee = AmountFromMinorUnits(txnFee),
+                                    PaymentStatus = GetPaymentStatus(transactionResp.Transaction)
+                                }
+                            };
+                        }
                     }
                 }
             }
             catch (Exception ex)
             {
-                Vendr.Log.Error<BamboraPaymentProvider>(ex, "Stripe - ProcessCallback");
+                Vendr.Log.Error<BamboraPaymentProvider>(ex, "Bambora - ProcessCallback");
             }
 
             return new CallbackResponse
@@ -176,14 +181,96 @@ namespace Vendr.PaymentProviders.Bambora
             };
         }
 
+        public override ApiResponse FetchPaymentStatus(OrderReadOnly order, BamboraSettings settings)
+        {
+            try
+            {
+                var clientConfig = GetBamboraClientConfig(settings);
+                var client = new BamboraClient(clientConfig);
+
+                var transactionResp = client.GetTransaction(order.TransactionInfo.TransactionId);
+                if (transactionResp.Meta.Result)
+                {
+                    return new ApiResponse(transactionResp.Transaction.Id, GetPaymentStatus(transactionResp.Transaction));
+                }
+            }
+            catch (Exception ex)
+            {
+                Vendr.Log.Error<BamboraPaymentProvider>(ex, "Bambora - FetchPaymentStatus");
+            }
+
+            return null;
+        }
+
         public override ApiResponse CancelPayment(OrderReadOnly order, BamboraSettings settings)
         {
-            return new ApiResponse(order.TransactionInfo.TransactionId, PaymentStatus.Cancelled);
+            try
+            {
+                var clientConfig = GetBamboraClientConfig(settings);
+                var client = new BamboraClient(clientConfig);
+
+                var transactionResp = client.DeleteTransaction(order.TransactionInfo.TransactionId);
+                if (transactionResp.Meta.Result)
+                {
+                    return new ApiResponse(order.TransactionInfo.TransactionId, PaymentStatus.Cancelled);
+                }
+            }
+            catch (Exception ex)
+            {
+                Vendr.Log.Error<BamboraPaymentProvider>(ex, "Bambora - CancelPayment");
+            }
+
+            return null;
         }
 
         public override ApiResponse CapturePayment(OrderReadOnly order, BamboraSettings settings)
         {
-            return new ApiResponse(order.TransactionInfo.TransactionId, PaymentStatus.Captured);
+            try
+            {
+                var clientConfig = GetBamboraClientConfig(settings);
+                var client = new BamboraClient(clientConfig);
+
+                var transactionResp = client.CaptureTransaction(order.TransactionInfo.TransactionId, new BamboraAmountRequest
+                {
+                    Amount = AmountInMinorUnits(order.TransactionInfo.AmountAuthorized.Value)
+                });
+
+                if (transactionResp.Meta.Result)
+                {
+                    return new ApiResponse(order.TransactionInfo.TransactionId, PaymentStatus.Captured);
+                }
+            }
+            catch (Exception ex)
+            {
+                Vendr.Log.Error<BamboraPaymentProvider>(ex, "Bambora - CapturePayment");
+            }
+
+            return null;
+        }
+
+        public override ApiResponse RefundPayment(OrderReadOnly order, BamboraSettings settings)
+        {
+            try
+            {
+                var clientConfig = GetBamboraClientConfig(settings);
+                var client = new BamboraClient(clientConfig);
+
+                var transactionResp = client.CreditTransaction(order.TransactionInfo.TransactionId, new BamboraAmountRequest
+                {
+                    Amount = AmountInMinorUnits(order.TransactionInfo.AmountAuthorized.Value)
+                });
+
+                if (transactionResp.Meta.Result)
+                {
+                    return new ApiResponse(order.TransactionInfo.TransactionId, PaymentStatus.Refunded);
+                }
+            }
+            catch (Exception ex)
+            {
+                Vendr.Log.Error<BamboraPaymentProvider>(ex, "Bambora - RefundPayment");
+            }
+
+            return null;
         }
 
         protected BamboraClientConfig GetBamboraClientConfig(BamboraSettings settings)
@@ -208,6 +295,23 @@ namespace Vendr.PaymentProviders.Bambora
                     MD5Key = settings.LiveMd5Key
                 };
             }
+        }
+
+        protected PaymentStatus GetPaymentStatus(BamboraTransaction transaction) 
+        {
+            if (transaction.Total.Credited > 0)
+                return PaymentStatus.Refunded;
+
+            if (transaction.Total.Declined > 0)
+                return PaymentStatus.Cancelled;
+
+            if (transaction.Total.Captured > 0)
+                return PaymentStatus.Captured;
+
+            if (transaction.Total.Authorized > 0)
+                return PaymentStatus.Authorized;
+
+            return PaymentStatus.Initialized;
         }
 
         protected string BamboraSafeOrderId(string orderId)
