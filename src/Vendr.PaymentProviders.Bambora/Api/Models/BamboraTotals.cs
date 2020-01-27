@@ -20,6 +20,6 @@ namespace Vendr.PaymentProviders.Bambora.Api.Models
         public int Declined { get; set; }
 
         [JsonProperty("feeamount")]
-        public int FedAmount { get; set; }
+        public int FeeAmount { get; set; }
     }
 }
