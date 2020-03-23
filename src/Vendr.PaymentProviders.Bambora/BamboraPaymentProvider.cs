@@ -58,7 +58,7 @@ namespace Vendr.PaymentProviders.Bambora
         public override PaymentFormResult GenerateForm(OrderReadOnly order, string continueUrl, string cancelUrl, string callbackUrl, BamboraSettings settings)
         {
             var currency = Vendr.Services.CurrencyService.GetCurrency(order.CurrencyId);
-            var orderAmount = AmountInMinorUnits(order.TotalPrice.Value.WithTax);
+            var orderAmount = (int)AmountToMinorUnits(order.TotalPrice.Value.WithTax);
 
             var clientConfig = GetBamboraClientConfig(settings);
             var client = new BamboraClient(clientConfig);
@@ -243,7 +243,7 @@ namespace Vendr.PaymentProviders.Bambora
 
                 var transactionResp = client.CaptureTransaction(order.TransactionInfo.TransactionId, new BamboraAmountRequest
                 {
-                    Amount = AmountInMinorUnits(order.TransactionInfo.AmountAuthorized.Value)
+                    Amount = (int)AmountToMinorUnits(order.TransactionInfo.AmountAuthorized.Value)
                 });
 
                 if (transactionResp.Meta.Result)
@@ -275,7 +275,7 @@ namespace Vendr.PaymentProviders.Bambora
 
                 var transactionResp = client.CreditTransaction(order.TransactionInfo.TransactionId, new BamboraAmountRequest
                 {
-                    Amount = AmountInMinorUnits(order.TransactionInfo.AmountAuthorized.Value)
+                    Amount = (int)AmountToMinorUnits(order.TransactionInfo.AmountAuthorized.Value)
                 });
 
                 if (transactionResp.Meta.Result)
@@ -342,18 +342,6 @@ namespace Vendr.PaymentProviders.Bambora
         protected string BamboraSafeOrderId(string orderId)
         {
             return Regex.Replace(orderId, "[^a-zA-Z0-9]", "");
-        }
-
-        protected static int AmountInMinorUnits(decimal val)
-        {
-            var cents = val * 100M;
-            var centsRounded = Math.Round(cents, MidpointRounding.AwayFromZero);
-            return Convert.ToInt32(centsRounded);
-        }
-
-        protected static decimal AmountFromMinorUnits(int val)
-        {
-            return val / 100M;
         }
     }
 }
