@@ -21,7 +21,8 @@ namespace Vendr.PaymentProviders.Bambora.Api
         {
             var result = new FlurlRequest("https://api.v1.checkout.bambora.com/sessions")
                 .AllowAnyHttpStatus()
-                .WithHeader("Authorization", "Basic " + GenerateApiKey(_config))
+                .WithHeader("Accept", "application/json")
+                .WithHeader("Authorization", _config.Authorization)
                 .PostJsonAsync(request)
                 .ReceiveJson<BamboraCheckoutSessionResponse>()
                 .Result;
@@ -33,7 +34,7 @@ namespace Vendr.PaymentProviders.Bambora.Api
         {
             var result = new FlurlRequest($"https://merchant-v1.api-eu.bambora.com/transactions/{txnId}")
                 .WithHeader("Accept", "application/json")
-                .WithHeader("Authorization", "Basic " + GenerateApiKey(_config))
+                .WithHeader("Authorization", _config.Authorization)
                 .AllowAnyHttpStatus()
                 .GetAsync()
                 .ReceiveJson<BamboraTransactionResponse>()
@@ -46,7 +47,7 @@ namespace Vendr.PaymentProviders.Bambora.Api
         {
             var result = new FlurlRequest($"https://transaction-v1.api-eu.bambora.com/transactions/{txnId}/capture")
                 .WithHeader("Accept", "application/json")
-                .WithHeader("Authorization", "Basic " + GenerateApiKey(_config))
+                .WithHeader("Authorization", _config.Authorization)
                 .AllowAnyHttpStatus()
                 .PostJsonAsync(req)
                 .ReceiveJson<BamboraResponse>()
@@ -59,7 +60,7 @@ namespace Vendr.PaymentProviders.Bambora.Api
         {
             var result = new FlurlRequest($"https://transaction-v1.api-eu.bambora.com/transactions/{txnId}/credit")
                 .WithHeader("Accept", "application/json")
-                .WithHeader("Authorization", "Basic " + GenerateApiKey(_config))
+                .WithHeader("Authorization", _config.Authorization)
                 .AllowAnyHttpStatus()
                 .PostJsonAsync(req)
                 .ReceiveJson<BamboraResponse>()
@@ -72,7 +73,7 @@ namespace Vendr.PaymentProviders.Bambora.Api
         {
             var result = new FlurlRequest($"https://transaction-v1.api-eu.bambora.com/transactions/{txnId}/delete")
                 .WithHeader("Accept", "application/json")
-                .WithHeader("Authorization", "Basic " + GenerateApiKey(_config))
+                .WithHeader("Authorization", _config.Authorization)
                 .AllowAnyHttpStatus()
                 .PostJsonAsync(null)
                 .ReceiveJson<BamboraResponse>()
@@ -100,18 +101,6 @@ namespace Vendr.PaymentProviders.Bambora.Api
             var calculatedHash = GetMD5Hash(toHash.ToString());
 
             return hash == calculatedHash;
-        }
-
-        private string GenerateApiKey(BamboraClientConfig config)
-        {
-            return GenerateApiKey(config.AccessKey, config.MerchantNumber, config.SecretKey);
-        }
-
-        private string GenerateApiKey(string accessToken, string merchantNumber, string secretToken)
-        {
-            var unencodedApiKey = $"{accessToken}@{merchantNumber}:{secretToken}";
-            var unencodedApiKeyAsBytes = Encoding.UTF8.GetBytes(unencodedApiKey);
-            return Convert.ToBase64String(unencodedApiKeyAsBytes);
         }
 
         private string GetMD5Hash(string input)

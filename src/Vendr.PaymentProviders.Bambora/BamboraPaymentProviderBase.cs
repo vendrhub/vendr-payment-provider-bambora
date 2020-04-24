@@ -45,9 +45,11 @@ namespace Vendr.PaymentProviders.Bambora
 
         protected BamboraClientConfig GetBamboraClientConfig(BamboraSettingsBase settings)
         {
+            BamboraClientConfig config;
+
             if (settings.TestMode)
             {
-                return new BamboraClientConfig
+                config = new BamboraClientConfig
                 {
                     AccessKey = settings.TestAccessKey,
                     MerchantNumber = settings.TestMerchantNumber,
@@ -57,7 +59,7 @@ namespace Vendr.PaymentProviders.Bambora
             }
             else
             {
-                return new BamboraClientConfig
+                config = new BamboraClientConfig
                 {
                     AccessKey = settings.LiveAccessKey,
                     MerchantNumber = settings.LiveMerchantNumber,
@@ -65,6 +67,12 @@ namespace Vendr.PaymentProviders.Bambora
                     MD5Key = settings.LiveMd5Key
                 };
             }
+
+            var apiKey = GenerateApiKey(config.AccessKey, config.MerchantNumber, config.SecretKey);
+
+            config.Authorization = "Basic " + apiKey;
+
+            return config;
         }
 
         protected PaymentStatus GetPaymentStatus(BamboraTransaction transaction)
@@ -87,6 +95,13 @@ namespace Vendr.PaymentProviders.Bambora
         protected string BamboraSafeOrderId(string orderId)
         {
             return Regex.Replace(orderId, "[^a-zA-Z0-9]", "");
+        }
+
+        private string GenerateApiKey(string accessToken, string merchantNumber, string secretToken)
+        {
+            var unencodedApiKey = $"{accessToken}@{merchantNumber}:{secretToken}";
+            var unencodedApiKeyAsBytes = Encoding.UTF8.GetBytes(unencodedApiKey);
+            return Convert.ToBase64String(unencodedApiKeyAsBytes);
         }
     }
 }
