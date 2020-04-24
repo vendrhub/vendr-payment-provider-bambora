@@ -300,7 +300,7 @@ namespace Vendr.PaymentProviders.Bambora
 
         protected BamboraClientConfig GetBamboraClientConfig(BamboraSettings settings)
         {
-            if (settings.Mode == BamboraMode.Test)
+            if (settings.TestMode)
             {
                 return new BamboraClientConfig
                 {
