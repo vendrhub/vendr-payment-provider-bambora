@@ -58,6 +58,14 @@ namespace Vendr.PaymentProviders.Bambora
         public override PaymentFormResult GenerateForm(OrderReadOnly order, string continueUrl, string cancelUrl, string callbackUrl, BamboraSettings settings)
         {
             var currency = Vendr.Services.CurrencyService.GetCurrency(order.CurrencyId);
+            var currencyCode = currency.Code.ToUpperInvariant();
+
+            // Ensure currency has valid ISO 4217 code
+            if (!Iso4217.CurrencyCodes.ContainsKey(currencyCode))
+            {
+                throw new Exception("Currency must be a valid ISO 4217 currency code: " + currency.Name);
+            }
+
             var orderAmount = (int)AmountToMinorUnits(order.TotalPrice.Value.WithTax);
 
             var clientConfig = GetBamboraClientConfig(settings);
@@ -75,7 +83,7 @@ namespace Vendr.PaymentProviders.Bambora
                 {
                     Id = BamboraSafeOrderId(order.OrderNumber),
                     Amount = orderAmount,
-                    Currency = currency.Code
+                    Currency = currencyCode
                 },
                 Urls = new BamboraUrls
                 {
