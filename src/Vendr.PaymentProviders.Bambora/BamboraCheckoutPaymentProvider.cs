@@ -16,10 +16,10 @@ namespace Vendr.PaymentProviders.Bambora
 {
     // https://developer.bambora.com/europe/checkout/getting-started/checkout-settings#filter-payment-methods
 
-    [PaymentProvider("bambora-checkout-onetime", "Bambora (One Time)", "Bambora (formally ePay) payment provider for one time payments")]
-    public class BamboraCheckoutOneTimePaymentProvider : BamboraPaymentProviderBase<BamboraCheckoutOneTimeSettings>
+    [PaymentProvider("bambora-checkout", "Bambora", "Bambora (formally ePay) payment provider for one time payments")]
+    public class BamboraCheckoutPaymentProvider : BamboraPaymentProviderBase<BamboraCheckoutSettings>
     {
-        public BamboraCheckoutOneTimePaymentProvider(VendrContext vendr)
+        public BamboraCheckoutPaymentProvider(VendrContext vendr)
             : base(vendr)
         { }
 
@@ -31,7 +31,7 @@ namespace Vendr.PaymentProviders.Bambora
         // We'll finalize via webhook callback
         public override bool FinalizeAtContinueUrl => false;
 
-        public override PaymentFormResult GenerateForm(OrderReadOnly order, string continueUrl, string cancelUrl, string callbackUrl, BamboraCheckoutOneTimeSettings settings)
+        public override PaymentFormResult GenerateForm(OrderReadOnly order, string continueUrl, string cancelUrl, string callbackUrl, BamboraCheckoutSettings settings)
         {
             var currency = Vendr.Services.CurrencyService.GetCurrency(order.CurrencyId);
             var currencyCode = currency.Code.ToUpperInvariant();
@@ -117,7 +117,7 @@ namespace Vendr.PaymentProviders.Bambora
             throw new ApplicationException(checkoutSession.Meta.Message.EndUser);
         }
 
-        public override CallbackResult ProcessCallback(OrderReadOnly order, HttpRequestBase request, BamboraCheckoutOneTimeSettings settings)
+        public override CallbackResult ProcessCallback(OrderReadOnly order, HttpRequestBase request, BamboraCheckoutSettings settings)
         {
             try
             {
@@ -156,13 +156,13 @@ namespace Vendr.PaymentProviders.Bambora
             }
             catch (Exception ex)
             {
-                Vendr.Log.Error<BamboraCheckoutOneTimePaymentProvider>(ex, "Bambora - ProcessCallback");
+                Vendr.Log.Error<BamboraCheckoutPaymentProvider>(ex, "Bambora - ProcessCallback");
             }
 
             return CallbackResult.BadRequest();
         }
 
-        public override ApiResult FetchPaymentStatus(OrderReadOnly order, BamboraCheckoutOneTimeSettings settings)
+        public override ApiResult FetchPaymentStatus(OrderReadOnly order, BamboraCheckoutSettings settings)
         {
             try
             {
@@ -184,13 +184,13 @@ namespace Vendr.PaymentProviders.Bambora
             }
             catch (Exception ex)
             {
-                Vendr.Log.Error<BamboraCheckoutOneTimePaymentProvider>(ex, "Bambora - FetchPaymentStatus");
+                Vendr.Log.Error<BamboraCheckoutPaymentProvider>(ex, "Bambora - FetchPaymentStatus");
             }
 
             return ApiResult.Empty;
         }
 
-        public override ApiResult CancelPayment(OrderReadOnly order, BamboraCheckoutOneTimeSettings settings)
+        public override ApiResult CancelPayment(OrderReadOnly order, BamboraCheckoutSettings settings)
         {
             try
             {
@@ -212,13 +212,13 @@ namespace Vendr.PaymentProviders.Bambora
             }
             catch (Exception ex)
             {
-                Vendr.Log.Error<BamboraCheckoutOneTimePaymentProvider>(ex, "Bambora - CancelPayment");
+                Vendr.Log.Error<BamboraCheckoutPaymentProvider>(ex, "Bambora - CancelPayment");
             }
 
             return ApiResult.Empty;
         }
 
-        public override ApiResult CapturePayment(OrderReadOnly order, BamboraCheckoutOneTimeSettings settings)
+        public override ApiResult CapturePayment(OrderReadOnly order, BamboraCheckoutSettings settings)
         {
             try
             {
@@ -244,13 +244,13 @@ namespace Vendr.PaymentProviders.Bambora
             }
             catch (Exception ex)
             {
-                Vendr.Log.Error<BamboraCheckoutOneTimePaymentProvider>(ex, "Bambora - CapturePayment");
+                Vendr.Log.Error<BamboraCheckoutPaymentProvider>(ex, "Bambora - CapturePayment");
             }
 
             return ApiResult.Empty;
         }
 
-        public override ApiResult RefundPayment(OrderReadOnly order, BamboraCheckoutOneTimeSettings settings)
+        public override ApiResult RefundPayment(OrderReadOnly order, BamboraCheckoutSettings settings)
         {
             try
             {
@@ -276,7 +276,7 @@ namespace Vendr.PaymentProviders.Bambora
             }
             catch (Exception ex)
             {
-                Vendr.Log.Error<BamboraCheckoutOneTimePaymentProvider>(ex, "Bambora - RefundPayment");
+                Vendr.Log.Error<BamboraCheckoutPaymentProvider>(ex, "Bambora - RefundPayment");
             }
 
             return ApiResult.Empty;

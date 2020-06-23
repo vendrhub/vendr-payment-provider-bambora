@@ -105,8 +105,8 @@
     <Compile Include="Api\Models\BamboraResponseMetaData.cs" />
     <Compile Include="Api\Models\BamboraTransaction.cs" />
     <Compile Include="Api\Models\BamboraTransactionResponse.cs" />
-    <Compile Include="BamboraCheckoutOneTimeSettings.cs" />
-    <Compile Include="BamboraCheckoutOneTimePaymentProvider.cs" />
+    <Compile Include="BamboraCheckoutSettings.cs" />
+    <Compile Include="BamboraCheckoutPaymentProvider.cs" />
     <Compile Include="BamboraPaymentProviderBase.cs" />
     <Compile Include="BamboraSettingsBase.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

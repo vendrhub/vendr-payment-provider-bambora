@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Vendr.PaymentProviders.Bambora
 {
-    public class BamboraCheckoutOneTimeSettings : BamboraSettingsBase
+    public class BamboraCheckoutSettings : BamboraSettingsBase
     {
 
     }
