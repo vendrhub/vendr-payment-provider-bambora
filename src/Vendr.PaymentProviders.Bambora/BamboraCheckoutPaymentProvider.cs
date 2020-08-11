@@ -16,10 +16,10 @@ namespace Vendr.PaymentProviders.Bambora
 {
     // https://developer.bambora.com/europe/checkout/getting-started/checkout-settings#filter-payment-methods
 
-    [PaymentProvider("bambora", "Bambora", "Bambora (formally ePay) payment provider for one time payments")]
-    public class BamboraPaymentProvider : PaymentProviderBase<BamboraSettings>
+    [PaymentProvider("bambora-checkout", "Bambora", "Bambora (formally ePay) payment provider for one time payments")]
+    public class BamboraCheckoutPaymentProvider : BamboraPaymentProviderBase<BamboraCheckoutSettings>
     {
-        public BamboraPaymentProvider(VendrContext vendr)
+        public BamboraCheckoutPaymentProvider(VendrContext vendr)
             : base(vendr)
         { }
 
@@ -31,31 +31,7 @@ namespace Vendr.PaymentProviders.Bambora
         // We'll finalize via webhook callback
         public override bool FinalizeAtContinueUrl => false;
 
-        public override string GetCancelUrl(OrderReadOnly order, BamboraSettings settings)
-        {
-            settings.MustNotBeNull("settings");
-            settings.CancelUrl.MustNotBeNull("settings.CancelUrl");
-
-            return settings.CancelUrl;
-        }
-
-        public override string GetErrorUrl(OrderReadOnly order, BamboraSettings settings)
-        {
-            settings.MustNotBeNull("settings");
-            settings.ErrorUrl.MustNotBeNull("settings.ErrorUrl");
-
-            return settings.ErrorUrl;
-        }
-
-        public override string GetContinueUrl(OrderReadOnly order, BamboraSettings settings)
-        {
-            settings.MustNotBeNull("settings");
-            settings.ContinueUrl.MustNotBeNull("settings.ContinueUrl");
-
-            return settings.ContinueUrl;
-        }
-
-        public override PaymentFormResult GenerateForm(OrderReadOnly order, string continueUrl, string cancelUrl, string callbackUrl, BamboraSettings settings)
+        public override PaymentFormResult GenerateForm(OrderReadOnly order, string continueUrl, string cancelUrl, string callbackUrl, BamboraCheckoutSettings settings)
         {
             var currency = Vendr.Services.CurrencyService.GetCurrency(order.CurrencyId);
             var currencyCode = currency.Code.ToUpperInvariant();
@@ -141,7 +117,7 @@ namespace Vendr.PaymentProviders.Bambora
             throw new ApplicationException(checkoutSession.Meta.Message.EndUser);
         }
 
-        public override CallbackResult ProcessCallback(OrderReadOnly order, HttpRequestBase request, BamboraSettings settings)
+        public override CallbackResult ProcessCallback(OrderReadOnly order, HttpRequestBase request, BamboraCheckoutSettings settings)
         {
             try
             {
@@ -180,13 +156,13 @@ namespace Vendr.PaymentProviders.Bambora
             }
             catch (Exception ex)
             {
-                Vendr.Log.Error<BamboraPaymentProvider>(ex, "Bambora - ProcessCallback");
+                Vendr.Log.Error<BamboraCheckoutPaymentProvider>(ex, "Bambora - ProcessCallback");
             }
 
             return CallbackResult.BadRequest();
         }
 
-        public override ApiResult FetchPaymentStatus(OrderReadOnly order, BamboraSettings settings)
+        public override ApiResult FetchPaymentStatus(OrderReadOnly order, BamboraCheckoutSettings settings)
         {
             try
             {
@@ -208,13 +184,13 @@ namespace Vendr.PaymentProviders.Bambora
             }
             catch (Exception ex)
             {
-                Vendr.Log.Error<BamboraPaymentProvider>(ex, "Bambora - FetchPaymentStatus");
+                Vendr.Log.Error<BamboraCheckoutPaymentProvider>(ex, "Bambora - FetchPaymentStatus");
             }
 
             return ApiResult.Empty;
         }
 
-        public override ApiResult CancelPayment(OrderReadOnly order, BamboraSettings settings)
+        public override ApiResult CancelPayment(OrderReadOnly order, BamboraCheckoutSettings settings)
         {
             try
             {
@@ -236,13 +212,13 @@ namespace Vendr.PaymentProviders.Bambora
             }
             catch (Exception ex)
             {
-                Vendr.Log.Error<BamboraPaymentProvider>(ex, "Bambora - CancelPayment");
+                Vendr.Log.Error<BamboraCheckoutPaymentProvider>(ex, "Bambora - CancelPayment");
             }
 
             return ApiResult.Empty;
         }
 
-        public override ApiResult CapturePayment(OrderReadOnly order, BamboraSettings settings)
+        public override ApiResult CapturePayment(OrderReadOnly order, BamboraCheckoutSettings settings)
         {
             try
             {
@@ -268,13 +244,13 @@ namespace Vendr.PaymentProviders.Bambora
             }
             catch (Exception ex)
             {
-                Vendr.Log.Error<BamboraPaymentProvider>(ex, "Bambora - CapturePayment");
+                Vendr.Log.Error<BamboraCheckoutPaymentProvider>(ex, "Bambora - CapturePayment");
             }
 
             return ApiResult.Empty;
         }
 
-        public override ApiResult RefundPayment(OrderReadOnly order, BamboraSettings settings)
+        public override ApiResult RefundPayment(OrderReadOnly order, BamboraCheckoutSettings settings)
         {
             try
             {
@@ -300,56 +276,10 @@ namespace Vendr.PaymentProviders.Bambora
             }
             catch (Exception ex)
             {
-                Vendr.Log.Error<BamboraPaymentProvider>(ex, "Bambora - RefundPayment");
+                Vendr.Log.Error<BamboraCheckoutPaymentProvider>(ex, "Bambora - RefundPayment");
             }
 
             return ApiResult.Empty;
-        }
-
-        protected BamboraClientConfig GetBamboraClientConfig(BamboraSettings settings)
-        {
-            if (settings.TestMode)
-            {
-                return new BamboraClientConfig
-                {
-                    AccessKey = settings.TestAccessKey,
-                    MerchantNumber = settings.TestMerchantNumber,
-                    SecretKey = settings.TestSecretKey,
-                    MD5Key = settings.TestMd5Key
-                };
-            }
-            else
-            {
-                return new BamboraClientConfig
-                {
-                    AccessKey = settings.LiveAccessKey,
-                    MerchantNumber = settings.LiveMerchantNumber,
-                    SecretKey = settings.LiveSecretKey,
-                    MD5Key = settings.LiveMd5Key
-                };
-            }
-        }
-
-        protected PaymentStatus GetPaymentStatus(BamboraTransaction transaction) 
-        {
-            if (transaction.Total.Credited > 0)
-                return PaymentStatus.Refunded;
-
-            if (transaction.Total.Declined > 0)
-                return PaymentStatus.Cancelled;
-
-            if (transaction.Total.Captured > 0)
-                return PaymentStatus.Captured;
-
-            if (transaction.Total.Authorized > 0)
-                return PaymentStatus.Authorized;
-
-            return PaymentStatus.Initialized;
-        }
-
-        protected string BamboraSafeOrderId(string orderId)
-        {
-            return Regex.Replace(orderId, "[^a-zA-Z0-9]", "");
         }
     }
 }
