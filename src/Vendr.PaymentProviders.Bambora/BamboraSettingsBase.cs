@@ -2,7 +2,7 @@ using Vendr.Core.Web.PaymentProviders;
 
 namespace Vendr.PaymentProviders.Bambora
 {
-    public class BamboraSettings
+    public class BamboraSettingsBase
     {
         [PaymentProviderSetting(Name = "Continue URL",
             Description = "The URL to continue to after this provider has done processing. eg: /continue/",
@@ -69,10 +69,10 @@ namespace Vendr.PaymentProviders.Bambora
             SortOrder = 1300)]
         public bool Capture { get; set; }
 
-        [PaymentProviderSetting(Name = "Mode",
-            Description = "Set whether to process payments in live or test mode.",
+        [PaymentProviderSetting(Name = "Test Mode",
+            Description = "Set whether to process payments in test mode.",
             SortOrder = 10000)]
-        public BamboraMode Mode { get; set; }
+        public bool TestMode { get; set; }
 
         // Advanced settings
 

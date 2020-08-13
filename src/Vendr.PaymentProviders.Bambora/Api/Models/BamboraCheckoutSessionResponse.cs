@@ -2,7 +2,7 @@
 
 namespace Vendr.PaymentProviders.Bambora.Api.Models
 {
-    public class BamboraCheckoutSession
+    public class BamboraCheckoutSessionResponse : BamboraResponse
     {
         [JsonProperty("token")]
         public string Token { get; set; }

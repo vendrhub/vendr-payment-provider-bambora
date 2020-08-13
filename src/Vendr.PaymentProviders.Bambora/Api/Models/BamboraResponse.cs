@@ -2,9 +2,9 @@
 
 namespace Vendr.PaymentProviders.Bambora.Api.Models
 {
-    public class BomboraResponse
+    public class BamboraResponse
     {
         [JsonProperty("meta")]
-        public BomboraResponseMetaData Meta { get; set; }
+        public BamboraResponseMetaData Meta { get; set; }
     }
 }

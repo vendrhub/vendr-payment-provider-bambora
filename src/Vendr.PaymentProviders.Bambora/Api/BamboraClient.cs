@@ -5,7 +5,6 @@ using System.Web;
 using Vendr.PaymentProviders.Bambora.Api.Models;
 using System;
 using System.Security.Cryptography;
-using Newtonsoft.Json;
 
 namespace Vendr.PaymentProviders.Bambora.Api
 {
@@ -18,32 +17,69 @@ namespace Vendr.PaymentProviders.Bambora.Api
             _config = config;
         }
 
-        public BamboraCheckoutSession CreateCheckoutSession(BamboraCreateCheckoutSessionRequest request)
+        public BamboraCheckoutSessionResponse CreateCheckoutSession(BamboraCreateCheckoutSessionRequest request)
         {
-            var apiKey = GenerateApiKey(_config);
-
-            return new FlurlRequest("https://api.v1.checkout.bambora.com/sessions")
-                .WithHeader("Content-Type", "application/json")
+            var result = new FlurlRequest("https://api.v1.checkout.bambora.com/sessions")
+                .AllowAnyHttpStatus()
                 .WithHeader("Accept", "application/json")
-                .WithHeader("Authorization", "Basic " + apiKey)
+                .WithHeader("Authorization", _config.Authorization)
                 .PostJsonAsync(request)
-                .ReceiveJson<BamboraCheckoutSession>()
+                .ReceiveJson<BamboraCheckoutSessionResponse>()
                 .Result;
+
+            return result;
         }
 
-        public BomboraTransaction GetTransaction(string txnId)
+        public BamboraTransactionResponse GetTransaction(string txnId)
         {
             var result = new FlurlRequest($"https://merchant-v1.api-eu.bambora.com/transactions/{txnId}")
-                .WithHeader("Authorization", "Basic " + GenerateApiKey(_config))
+                .WithHeader("Accept", "application/json")
+                .WithHeader("Authorization", _config.Authorization)
+                .AllowAnyHttpStatus()
                 .GetAsync()
-                .ReceiveJson<BomboraTransactionResponse>()
+                .ReceiveJson<BamboraTransactionResponse>()
                 .Result;
 
-            // TODO: Log unsuccessful request
+            return result;
+        }
 
-            return result.Meta.Result
-                ? result.Transaction
-                : null;
+        public BamboraResponse CaptureTransaction(string txnId, BamboraAmountRequest req = null)
+        {
+            var result = new FlurlRequest($"https://transaction-v1.api-eu.bambora.com/transactions/{txnId}/capture")
+                .WithHeader("Accept", "application/json")
+                .WithHeader("Authorization", _config.Authorization)
+                .AllowAnyHttpStatus()
+                .PostJsonAsync(req)
+                .ReceiveJson<BamboraResponse>()
+                .Result;
+
+            return result;
+        }
+
+        public BamboraResponse CreditTransaction(string txnId, BamboraAmountRequest req)
+        {
+            var result = new FlurlRequest($"https://transaction-v1.api-eu.bambora.com/transactions/{txnId}/credit")
+                .WithHeader("Accept", "application/json")
+                .WithHeader("Authorization", _config.Authorization)
+                .AllowAnyHttpStatus()
+                .PostJsonAsync(req)
+                .ReceiveJson<BamboraResponse>()
+                .Result;
+
+            return result;
+        }
+
+        public BamboraResponse DeleteTransaction(string txnId)
+        {
+            var result = new FlurlRequest($"https://transaction-v1.api-eu.bambora.com/transactions/{txnId}/delete")
+                .WithHeader("Accept", "application/json")
+                .WithHeader("Authorization", _config.Authorization)
+                .AllowAnyHttpStatus()
+                .PostJsonAsync(null)
+                .ReceiveJson<BamboraResponse>()
+                .Result;
+
+            return result;
         }
 
         public bool ValidateRequest(HttpRequestBase request)
@@ -65,18 +101,6 @@ namespace Vendr.PaymentProviders.Bambora.Api
             var calculatedHash = GetMD5Hash(toHash.ToString());
 
             return hash == calculatedHash;
-        }
-
-        private string GenerateApiKey(BamboraClientConfig config)
-        {
-            return GenerateApiKey(config.AccessKey, config.MerchantNumber, config.SecretKey);
-        }
-
-        private string GenerateApiKey(string accessToken, string merchantNumber, string secretToken)
-        {
-            var unencodedApiKey = $"{accessToken}@{merchantNumber}:{secretToken}";
-            var unencodedApiKeyAsBytes = Encoding.UTF8.GetBytes(unencodedApiKey);
-            return Convert.ToBase64String(unencodedApiKeyAsBytes);
         }
 
         private string GetMD5Hash(string input)

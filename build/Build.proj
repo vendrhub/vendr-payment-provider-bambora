@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8" ?>
+﻿<?xml version="1.0" encoding="utf-8" ?>
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003" DefaultTargets="PrepareOnly" ToolsVersion="14.0">
     
 	<!-- PROPERTIES -->
@@ -14,11 +14,17 @@
         <ArtifactsDir Condition="'$(ArtifactsDir)'==''">$(RootDir)\artifacts</ArtifactsDir>
         <ArtifactFilesDir>$(ArtifactsDir)\files</ArtifactFilesDir>
         <ArtifactPackagesDir>$(ArtifactsDir)\packages</ArtifactPackagesDir>
+        
+        <PaymentProviderName>Bambora</PaymentProviderName>
+        <ProjectName>Vendr.PaymentProviders.$(PaymentProviderName)</ProjectName>
+        <MinUmbracoVersion>8.2.0</MinUmbracoVersion>
+
+        <GitVersionConfig>$(BuildToolsDir)\GitVersion\GitVersion.yml</GitVersionConfig>
 	</PropertyGroup>
 
     <ItemGroup>
-        <SolutionFile Include="$(RootDir)\*.sln" />
-        <ProjectFiles Include="$(SourceDir)\Vendr.PaymentProviders.*\*.csproj" />
+        <SolutionFile Include="$(RootDir)\$(ProjectName).sln" />
+        <ProjectFiles Include="$(SourceDir)\$(ProjectName)\$(ProjectName).csproj" />
     </ItemGroup>
 
 	<!-- IMPORT SUB TASKS -->
