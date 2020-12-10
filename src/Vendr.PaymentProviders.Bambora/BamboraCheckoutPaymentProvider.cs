@@ -42,7 +42,7 @@ namespace Vendr.PaymentProviders.Bambora
                 throw new Exception("Currency must be a valid ISO 4217 currency code: " + currency.Name);
             }
 
-            var orderAmount = (int)AmountToMinorUnits(order.TotalPrice.Value.WithTax);
+            var orderAmount = (int)AmountToMinorUnits(order.TransactionAmount.Value);
 
             var clientConfig = GetBamboraClientConfig(settings);
             var client = new BamboraClient(clientConfig);

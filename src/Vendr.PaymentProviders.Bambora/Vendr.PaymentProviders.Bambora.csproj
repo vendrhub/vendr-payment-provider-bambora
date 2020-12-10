@@ -53,6 +53,9 @@
     <Reference Include="System.Configuration" />
     <Reference Include="System.Core" />
     <Reference Include="System.Data.Linq" />
+    <Reference Include="System.Linq.Dynamic.Core, Version=1.1.1.0, Culture=neutral, PublicKeyToken=0f07ec44de6ac832, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\System.Linq.Dynamic.Core.1.1.1\lib\net46\System.Linq.Dynamic.Core.dll</HintPath>
+    </Reference>
     <Reference Include="System.Net.Http.WebRequest" />
     <Reference Include="System.Web" />
     <Reference Include="System.Web.Helpers, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
@@ -79,11 +82,11 @@
     <Reference Include="System.Data" />
     <Reference Include="System.Net.Http" />
     <Reference Include="System.Xml" />
-    <Reference Include="Vendr.Core, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\Vendr.Core.1.0.0\lib\net472\Vendr.Core.dll</HintPath>
+    <Reference Include="Vendr.Core, Version=1.4.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\Vendr.Core.1.4.0\lib\net472\Vendr.Core.dll</HintPath>
     </Reference>
-    <Reference Include="Vendr.Core.Web, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\..\packages\Vendr.Core.Web.1.0.0\lib\net472\Vendr.Core.Web.dll</HintPath>
+    <Reference Include="Vendr.Core.Web, Version=1.4.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\Vendr.Core.Web.1.4.0\lib\net472\Vendr.Core.Web.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
