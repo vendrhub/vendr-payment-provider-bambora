@@ -2,7 +2,7 @@
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.29503.13
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Vendr.PaymentProvider.Bambora", "src\Vendr.PaymentProvider.Bambora\Vendr.PaymentProvider.Bambora.csproj", "{35E2F8CF-A5B6-4BB7-84CB-A5412A3ED9E4}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Vendr.PaymentProviders.Bambora", "src\Vendr.PaymentProviders.Bambora\Vendr.PaymentProviders.Bambora.csproj", "{35E2F8CF-A5B6-4BB7-84CB-A5412A3ED9E4}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "_build", "build\_build.csproj", "{C73D6D19-FB88-4682-9A1F-27FC011D73E2}"
 EndProject
