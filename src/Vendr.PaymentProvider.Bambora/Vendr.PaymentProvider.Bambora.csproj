@@ -1,0 +1,29 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <Authors>Vendr, Outfield Digital Ltd</Authors>
+    <Company>Outfield Digital Ltd</Company>
+    <Copyright>Outfield Digital Ltd</Copyright>
+    <Description>Bambora payment provider for Vendr, the eCommerce package for Umbraco</Description>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageProjectUrl>https://vendr.net</PackageProjectUrl>
+    <PackageIcon>logo-128.png</PackageIcon>
+    <RepositoryUrl>https://github.com/vendrhub/vendr-payment-provider-stripe</RepositoryUrl>
+    <PackageTags>umbraco, vendr, ecommerce, bambora</PackageTags>
+    <RepositoryType>git</RepositoryType>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Vendr.Core" Version="2.0.0-rc0049" />
+    <PackageReference Include="Microsoft.AspNet.WebApi.Client" Version="5.2.7" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="..\..\assets\logo-128.png">
+      <Pack>True</Pack>
+      <PackagePath></PackagePath>
+    </None>
+  </ItemGroup>
+
+</Project>
